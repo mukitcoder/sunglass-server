@@ -1,5 +1,6 @@
 const express = require('express')
 const cors = require('cors')
+const ObjectId = require('mongodb').ObjectId
 const { MongoClient } = require('mongodb');
 require('dotenv').config()
 const app = express()
@@ -19,6 +20,7 @@ async function run() {
       const database = client.db('sunglass_pro');
       const purchaseCollection = database.collection('purchase');
       const productsCollection = database.collection('products')
+      const reviewsCollection = database.collection('reviews')
       const usersCollection = database.collection('users')
 
 
@@ -28,6 +30,13 @@ async function run() {
         const result = await productsCollection.insertOne(req.body)
         res.send(result)
       })
+
+      // add review to DB
+      app.post('/addReview', async(req, res)=>{
+        const result = await reviewsCollection.insertOne(req.body)
+        res.send(result)
+      })
+
         // post purchase info to DB
         app.post('/purchase', async(req, res)=>{
             const purchases = req.body
@@ -65,6 +74,12 @@ async function run() {
           res.send(result)
         })
 
+        //get all reviews from db
+        app.get('/allreviews', async(req, res)=>{
+          const result = await reviewsCollection.find({}).toArray()
+          res.send(result)
+        })
+
         // get purchase info from DB
         app.get('/purchase', async (req, res)=>{
             const email = req.query.email
@@ -73,6 +88,29 @@ async function run() {
             const orders = await cursor.toArray()
             res.json(orders)
         })
+
+        // test--- full purchase
+        app.get('/purchase', async (req, res)=>{
+          const cursor = purchaseCollection.find({})
+          const purchase = await cursor.toArray()
+          res.send(purchase)
+        }) 
+        // test--- single purchase
+        app.get('/purchase/:id', async (req, res)=>{
+          const id = req.params.id
+          const query = {_id:ObjectId(id)}
+          const purchase = await purchaseCollection.findOne(query)
+          res.json(purchase)
+        }) 
+
+        // test--- single product
+        app.get('/allProducts/:id', async (req, res)=>{
+          const id = req.params.id
+          const query = {_id:ObjectId(id)}
+          const purchase = await productsCollection.findOne(query)
+          res.json(purchase)
+        }) 
+
 
         // for check admin to get access in UI
         app.get('/users/:email', async(req, res)=>{
@@ -84,6 +122,22 @@ async function run() {
               isAdmin = true
           }
           res.json({admin:isAdmin})
+        })
+
+        // delete orders (purchase)
+        app.delete('/purchase/:id', async(req, res)=>{
+          const id = req.params.id
+          const query = {_id:ObjectId(id)}
+          const result = await purchaseCollection.deleteOne(query)
+          res.json(result)
+        })
+        
+        // delete products
+        app.delete('/allProducts/:id', async(req, res)=>{
+          const id = req.params.id
+          const query = {_id:ObjectId(id)}
+          const result = await productsCollection.deleteOne(query)
+          res.json(result)
         })
 
     } finally {
