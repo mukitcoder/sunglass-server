@@ -22,6 +22,7 @@ async function run() {
       const productsCollection = database.collection('products')
       const reviewsCollection = database.collection('reviews')
       const usersCollection = database.collection('users')
+      // const manageAllOrdersCollection = database.collection('manageAllOrders')
 
 
 
@@ -89,12 +90,30 @@ async function run() {
             res.json(orders)
         })
 
+
+
+        // test--- manage all purchase
+        // app.get('/purchase', async (req, res)=>{
+        //   const cursor = manageAllOrdersCollection.find({})
+        //   const purchase = await cursor.toArray()
+        //   res.send(purchase)
+        // }) 
+
+        // test--- manage single purchase
+        // app.get('/purchase/:id', async (req, res)=>{
+        //   const id = req.params.id
+        //   const query = {_id:ObjectId(id)}
+        //   const purchase = await manageAllOrdersCollection.findOne(query)
+        //   res.json(purchase)
+        // }) 
+
         // test--- full purchase
         app.get('/purchase', async (req, res)=>{
           const cursor = purchaseCollection.find({})
           const purchase = await cursor.toArray()
-          res.send(purchase)
+          res.json(purchase)
         }) 
+
         // test--- single purchase
         app.get('/purchase/:id', async (req, res)=>{
           const id = req.params.id
@@ -103,7 +122,11 @@ async function run() {
           res.json(purchase)
         }) 
 
-        // test--- single product
+        
+
+
+
+        // get single product from db
         app.get('/allProducts/:id', async (req, res)=>{
           const id = req.params.id
           const query = {_id:ObjectId(id)}
